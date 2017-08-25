@@ -8,8 +8,8 @@ public class Swarm {
 	public void search() {
 		for(int i=0; i<Variables.ITERATIONS; i++) {
 			factory.generate();
+			pheromones.update();
 		}
-		pheromones.update();
 	}
 	
 }
