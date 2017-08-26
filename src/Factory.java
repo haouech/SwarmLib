@@ -1,14 +1,16 @@
-import java.util.ArrayList;
 
 public class Factory {
 	
-	ArrayList<Ant> antList = new ArrayList<Ant>();
+	public Factory() {
+	}
 	
 	public void generate() {
-		while(antList.size() < Variables.NUM_ANTS)
+		int antCount = Variables.NUM_ANTS - Variables.antList.size();
+		while(antCount-- > 0)
 		{
 			Ant a = new Ant();
-			antList.add(a);
+			Variables.antList.add(a);
+			a.run();
 		}
 	}
 }
