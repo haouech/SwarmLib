@@ -1,3 +1,4 @@
+package main;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
@@ -10,7 +11,7 @@ import javax.imageio.ImageIO;
 public class Swarm {
 	
 	Factory factory = new Factory();
-	Pheromones pheromones = new Pheromones();
+	Pheromones pheromones;
 //	BufferedImage image;
 	
 	public Swarm(BufferedImage image) {
@@ -21,6 +22,8 @@ public class Swarm {
 		Variables.ANT_DISTANCE = Variables.HEIGHT + Variables.WIDTH;
 		Variables.antList = new ArrayList<Ant>();
 		Variables.pixels = convert2DImage();
+		Variables.trails = new double[Variables.HEIGHT][Variables.WIDTH];
+		pheromones = new Pheromones();
 	}
 	
 	public void search() {
@@ -29,14 +32,30 @@ public class Swarm {
 			return;
 		}
 		init();
-		
+//		for(int i=0; i<Variables.WIDTH; i++) {
+//			for(int j=0; j<Variables.HEIGHT; j++) {
+//				System.out.print(Variables.heuristic[i][j] + " ");
+//			}
+//			System.out.println();
+//		}
+		System.out.println(Variables.heuristic);
 		for(int i=0; i<Variables.ITERATIONS; i++) {
 			factory.generate();
 			pheromones.update();
 		}
+		
+
+		for(int i=0; i<Variables.WIDTH; i++) {
+			for(int j=0; j<Variables.HEIGHT; j++) {
+				System.out.print(Variables.trails[i][j] + " ");
+			}
+			System.out.println();
+		}
+		saveFinalImage();
+		
 	}
 	
-	private void init() {
+	public void init() {
 		pheromones.init_trails();
 		Variables.heuristic = init_heuristic_matrix();
 	}
@@ -50,7 +69,7 @@ public class Swarm {
 		
 		for(int row=0;row<height; row++) {
 			for(int col=0; col<width; col++) {
-				heuristic[row][col] = VC(new Pixel(row, col), f) * Variables.pixels[row][col] / Z;
+				heuristic[row][col] = 1e7 * VC(new Pixel(row, col), f) * Variables.pixels[row][col] / Z;
 			}
 		}
 		return heuristic;
@@ -82,7 +101,7 @@ public class Swarm {
 		if(x-2 >=0 && y-1 >= 0 && x+2 < Variables.HEIGHT && y+1 < Variables.WIDTH) {
 			value += Math.abs(Variables.pixels[x-2][y-1] - Variables.pixels[x+2][y+1]);
 		}
-		if(x-2 >=0&& x+2 < Variables.HEIGHT && y-1 >= 0) {
+		if(x-2 >=0&& x+2 < Variables.HEIGHT && y-1 >= 0 && y+1 < Variables.WIDTH) {
 			value += Math.abs(Variables.pixels[x-2][y+1] - Variables.pixels[x+2][y-1]);
 		}
 		if(x-1 >=0 && y-2 >= 0 && x+1 < Variables.HEIGHT && y+2 < Variables.WIDTH) {
@@ -105,7 +124,7 @@ public class Swarm {
 		}
 		return f.apply(value);
 	}
-
+	
 	private int[][] convert2DImage() {
 
 		final byte[] pixels = ((DataBufferByte) Variables.image.getRaster().getDataBuffer()).getData();
@@ -118,9 +137,9 @@ public class Swarm {
 		final int pixelLength = 3 + alpha;
 		for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += pixelLength) {
 			int argb = 0;
-			argb += ((int) pixels[pixel + alpha] & 0xff); // blue
-			argb += (((int) pixels[pixel + alpha + 1] & 0xff)); // green
-			argb += (((int) pixels[pixel + alpha + 2] & 0xff)); // red
+			argb += (int) (pixels[pixel + alpha] & 0xff); // blue
+			argb += (int) (pixels[pixel + alpha + 1] & 0xff); // green
+			argb += (int) (pixels[pixel + alpha + 2] & 0xff); // red
 			result[row][col] = argb/3;
 			col++;
 			if (col == width) {
@@ -142,6 +161,28 @@ public class Swarm {
 		}
 
 	    File ImageFile = new File("grayscale.png");
+	    try {
+	        ImageIO.write(mImage, "png", ImageFile);
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	public void saveFinalImage() {
+		
+		BufferedImage mImage = new BufferedImage(Variables.WIDTH, Variables.HEIGHT, BufferedImage.TYPE_BYTE_GRAY);
+		for(int row=0; row<Variables.HEIGHT; row++) {
+			for(int col=0; col<Variables.WIDTH; col++) {
+				if(Variables.trails[col][row] > Variables.THRESHHOLD) {
+					mImage.setRGB(col, row, 255);
+				} else {
+					mImage.setRGB(col, row, (1 << 16) - 1);
+				}
+				
+			}
+		}
+
+	    File ImageFile = new File("final.png");
 	    try {
 	        ImageIO.write(mImage, "png", ImageFile);
 	    } catch (IOException e) {

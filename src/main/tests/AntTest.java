@@ -1,13 +1,21 @@
+package main.tests;
+
+import static org.junit.Assert.*;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class Main {
+import org.junit.Test;
+import main.Ant;
+import main.Swarm;
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+public class AntTest {
+
+	@Test
+	public void test() {
 		BufferedImage image = null;
 		try {
 			image = ImageIO.read(new File("image.jpg"));
@@ -18,10 +26,7 @@ public class Main {
 		}
 		
 		Swarm swarm = new Swarm(image);
-		System.out.println("Begin edge detection");
-//		swarm.search();
-		System.out.println("End");
-		swarm.loadGrayscaleImage();
+		
 	}
 
 }

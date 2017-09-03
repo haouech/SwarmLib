@@ -1,3 +1,4 @@
+package main;
 
 public class Factory {
 	
@@ -10,7 +11,7 @@ public class Factory {
 		{
 			Ant a = new Ant();
 			Variables.antList.add(a);
-			a.run();
+			a.start();
 		}
 	}
 }
