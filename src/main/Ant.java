@@ -11,10 +11,11 @@ public class Ant extends Thread {
 	private ArrayList<Pixel> path;
 	private Vector<Double> probabilites;
 	private Pheromones pheromones = null;
+	private Variables variables = Variables.getInstance();
 	
 	public Ant(){
-		x_pos = (int)(Math.random()*Variables.HEIGHT);
-		y_pos = (int)(Math.random()*Variables.WIDTH);
+		x_pos = (int)(Math.random()*variables.HEIGHT);
+		y_pos = (int)(Math.random()*variables.WIDTH);
 		x_old = x_pos;
 		y_old = y_pos;
 		System.out.println("x: " + x_pos + ", y: " + y_pos);
@@ -46,7 +47,7 @@ public class Ant extends Thread {
 		}
 		System.out.println("Finished");
 		for(Pixel pixel : path) {
-//			Pheromones.deposit_pheromone(pixel);
+//			pheromones.deposit_pheromone(pixel);
 		}
 		die();
 	}
@@ -63,7 +64,7 @@ public class Ant extends Thread {
 		for(int i=0;i<8;i++) {
 			int nx = x_pos + dx[i];
 			int ny = y_pos + dy[i];
-			if(nx < Variables.HEIGHT && nx >=0 && ny < Variables.WIDTH && ny >= 0 && nx != x_old && ny != y_old) {
+			if(nx < variables.HEIGHT && nx >=0 && ny < variables.WIDTH && ny >= 0 && nx != x_old && ny != y_old) {
 				pixels.add(new Pixel(nx, ny));
 			}
 		}
@@ -76,8 +77,8 @@ public class Ant extends Thread {
 		for(Pixel pixel : pixels) {
 			int x = pixel.getX();
 			int y = pixel.getY();
-			double t = Math.pow(Variables.trails[x][y], (double)Variables.alpha);
-			double n = Math.pow(Variables.heuristic[x][y], (double)Variables.beta);
+			double t = Math.pow(variables.trails[x][y], (double)variables.alpha);
+			double n = Math.pow(variables.heuristic[x][y], (double)variables.beta);
 			sum += t*n;
 		}
 		probabilites = new Vector<Double>();
@@ -86,8 +87,8 @@ public class Ant extends Thread {
 			Pixel pixel = pixels.get(i);
 			int x = pixel.getX();
 			int y = pixel.getY();
-			double t = Math.pow(Variables.trails[x][y], (double)Variables.alpha);
-			double n = Math.pow(Variables.heuristic[x][y], (double)Variables.beta);
+			double t = Math.pow(variables.trails[x][y], (double)variables.alpha);
+			double n = Math.pow(variables.heuristic[x][y], (double)variables.beta);
 			probabilites.set(i, t*n/sum);
 		}
 	}
@@ -108,27 +109,27 @@ public class Ant extends Thread {
 	private synchronized void move_to_next_state(Pixel state) {
 		// TODO Move the ant to the next state 
 		current_distance++;
-		if(current_distance >= Variables.ANT_DISTANCE) {
+		if(current_distance >= variables.ANT_DISTANCE) {
 			finished = true;
 		}
 		path.add(state);
 		x_pos = state.getX();
 		y_pos = state.getY();
-		Variables.visited[x_pos][y_pos]++;
+		variables.visited[x_pos][y_pos]++;
 	}
 	
 //	private void deposit_pheromone(Pixel pixel) {
 //		// TODO update current pixel
 //		int x = pixel.getX();
 //		int y = pixel.getY();
-//		Variables.trails[x][y] += Variables.PHEROMONE_WEIGHT;
+//		variables.trails[x][y] += variables.PHEROMONE_WEIGHT;
 //	}
 	private void update_local_trails() {
 		
 	}
 	
 	public synchronized void die() {
-//		Variables.antList.remove(this);
-		Variables.currentAntNumber--;
+//		variables.antList.remove(this);
+		variables.currentAntNumber--;
 	}
 }

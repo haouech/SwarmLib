@@ -5,6 +5,7 @@ import java.util.Iterator;
 public class Factory {
 	
 	private Pheromones pheromones;
+	private Variables variables = Variables.getInstance();
 	
 	public Factory(Pheromones p) {
 		pheromones = p;
@@ -12,21 +13,21 @@ public class Factory {
 	
 	public void generate() {
 		
-		int antCount = Variables.NUM_ANTS - Variables.currentAntNumber;
+		int antCount = variables.NUM_ANTS - variables.currentAntNumber;
 		while(antCount-- > 0)
 		{
 			Ant a = new Ant();
 			a.setPheromones(pheromones);
-			Variables.antList.add(a);
+			variables.antList.add(a);
 			a.start();
-			Variables.currentAntNumber++;
+			variables.currentAntNumber++;
 			try {
 				a.join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		Iterator<Ant> iter = Variables.antList.iterator();
+		Iterator<Ant> iter = variables.antList.iterator();
 		while(iter.hasNext()) {
 			Ant a = iter.next();
 			try {
@@ -36,7 +37,7 @@ public class Factory {
 				e.printStackTrace();
 			}
 		}
-//		while(Variables.currentAntNumber != 0) {
+//		while(variables.currentAntNumber != 0) {
 //			
 //		}
 	}

@@ -10,36 +10,37 @@ import javax.imageio.ImageIO;
 
 public class Swarm {
 	
-	Factory factory;
-	Pheromones pheromones;
+	private Factory factory;
+	private Pheromones pheromones;
+	private Variables variables = Variables.getInstance();
 //	BufferedImage image;
 	
 	public Swarm(BufferedImage image) {
-		Variables.image = image;
-		Variables.HEIGHT = image.getHeight();
-		Variables.WIDTH = image.getWidth();
-		Variables.NUM_ANTS = (int)Math.sqrt(1.0*Variables.HEIGHT*Variables.WIDTH);
-		System.out.println("Num Ants: " + Variables.NUM_ANTS);
-//		Variables.ANT_DISTANCE = Variables.HEIGHT + Variables.WIDTH;
-		Variables.antList = new ArrayList<Ant>();
-		Variables.pixels = convert2DImage();
-		Variables.trails = new double[Variables.HEIGHT][Variables.WIDTH];
-		Variables.visited = new int[Variables.HEIGHT][Variables.WIDTH];
+		variables.image = image;
+		variables.HEIGHT = image.getHeight();
+		variables.WIDTH = image.getWidth();
+		variables.NUM_ANTS = (int)Math.sqrt(1.0*variables.HEIGHT*variables.WIDTH);
+		System.out.println("Num Ants: " + variables.NUM_ANTS);
+//		variables.ANT_DISTANCE = variables.HEIGHT + variables.WIDTH;
+		variables.antList = new ArrayList<Ant>();
+		variables.pixels = convert2DImage();
+		variables.trails = new double[variables.HEIGHT][variables.WIDTH];
+		variables.visited = new int[variables.HEIGHT][variables.WIDTH];
 		pheromones = new Pheromones();
 		factory = new Factory(pheromones);
 	}
 	
 	public void search() {
-		if(Variables.image == null) {
+		if(variables.image == null) {
 			System.out.println("Please check your image before searching");
 			return;
 		}
 		init();
-//		printArray(Variables.heuristic);
+//		printArray(variables.heuristic);
 //		System.out.println("************");
-//		printArray(Variables.pixels);
-		printArray(Variables.trails);
-		for(int i=0; i<Variables.ITERATIONS; i++) {
+//		printArray(variables.pixels);
+		printArray(variables.trails);
+		for(int i=0; i<variables.ITERATIONS; i++) {
 			System.out.println("******  " + (i+1) + "  ******");
 			init_visited();
 			factory.generate();
@@ -48,35 +49,35 @@ public class Swarm {
 		}
 		
 
-		printArray(Variables.trails);
+		printArray(variables.trails);
 		saveFinalImage();
 		
 	}
 	
 	public void init() {
 		pheromones.init_trails();
-		Variables.heuristic = init_heuristic_matrix();
+		variables.heuristic = init_heuristic_matrix();
 	}
 	
 	public void init_visited() {
-		for(int i=0; i<Variables.WIDTH; i++) {
-			for(int j=0; j<Variables.HEIGHT; j++) {
-				Variables.visited[i][j] = 0;
+		for(int i=0; i<variables.WIDTH; i++) {
+			for(int j=0; j<variables.HEIGHT; j++) {
+				variables.visited[i][j] = 0;
 			}
 		}		
 	}
 	
 	private double[][] init_heuristic_matrix() {
-		DoubleFunction<Double> f = x->{return Variables.LAMBDA*x;};
+		DoubleFunction<Double> f = x->{return variables.LAMBDA*x;};
 		double Z = normalize_image(f);
 		System.out.println("Z: " + Z);
-		int width = Variables.WIDTH;
-		int height = Variables.HEIGHT;
+		int width = variables.WIDTH;
+		int height = variables.HEIGHT;
 		double[][] heuristic = new double[height][width];
 		
 		for(int row=0;row<height; row++) {
 			for(int col=0; col<width; col++) {
-				heuristic[row][col] = VC(new Pixel(row, col), f) / Z; // * Variables.pixels[row][col];
+				heuristic[row][col] = VC(new Pixel(row, col), f) / Z; // * variables.pixels[row][col];
 			}
 		}
 		return heuristic;
@@ -84,8 +85,8 @@ public class Swarm {
 	
 	private double normalize_image(DoubleFunction<Double> f) {
 		// TODO Auto-generated method stub
-		int width = Variables.WIDTH;
-		int height = Variables.HEIGHT;
+		int width = variables.WIDTH;
+		int height = variables.HEIGHT;
 		double Z = 0.0;
 		for(int row=0;row<height; row++) {
 			for(int col=0; col<width; col++) {
@@ -105,39 +106,39 @@ public class Swarm {
 		int x = pixel.getX();
 		int y = pixel.getY();
 		long value = 0;
-		if(x-2 >=0 && y-1 >= 0 && x+2 < Variables.HEIGHT && y+1 < Variables.WIDTH) {
-			value += Math.abs(Variables.pixels[x-2][y-1] - Variables.pixels[x+2][y+1]);
+		if(x-2 >=0 && y-1 >= 0 && x+2 < variables.HEIGHT && y+1 < variables.WIDTH) {
+			value += Math.abs(variables.pixels[x-2][y-1] - variables.pixels[x+2][y+1]);
 		}
-		if(x-2 >=0&& x+2 < Variables.HEIGHT && y-1 >= 0 && y+1 < Variables.WIDTH) {
-			value += Math.abs(Variables.pixels[x-2][y+1] - Variables.pixels[x+2][y-1]);
+		if(x-2 >=0&& x+2 < variables.HEIGHT && y-1 >= 0 && y+1 < variables.WIDTH) {
+			value += Math.abs(variables.pixels[x-2][y+1] - variables.pixels[x+2][y-1]);
 		}
-		if(x-1 >=0 && y-2 >= 0 && x+1 < Variables.HEIGHT && y+2 < Variables.WIDTH) {
-			value += Math.abs(Variables.pixels[x-1][y-2] - Variables.pixels[x+1][y+2]);
+		if(x-1 >=0 && y-2 >= 0 && x+1 < variables.HEIGHT && y+2 < variables.WIDTH) {
+			value += Math.abs(variables.pixels[x-1][y-2] - variables.pixels[x+1][y+2]);
 		}
-		if(x-1 >=0 && y-1 >= 0 && x+1 < Variables.HEIGHT && y+1 < Variables.WIDTH) {
-			value += Math.abs(Variables.pixels[x-1][y-1] - Variables.pixels[x+1][y+1]);
+		if(x-1 >=0 && y-1 >= 0 && x+1 < variables.HEIGHT && y+1 < variables.WIDTH) {
+			value += Math.abs(variables.pixels[x-1][y-1] - variables.pixels[x+1][y+1]);
 		}
-		if(x-1 >=0 && x+1 < Variables.HEIGHT) {
-			value += Math.abs(Variables.pixels[x-1][y] - Variables.pixels[x+1][y]);
+		if(x-1 >=0 && x+1 < variables.HEIGHT) {
+			value += Math.abs(variables.pixels[x-1][y] - variables.pixels[x+1][y]);
 		}
-		if(x-1 >=0 && y-1 >= 0 && y+1 < Variables.WIDTH) {
-			value += Math.abs(Variables.pixels[x-1][y+1] - Variables.pixels[x-1][y-1]);
+		if(x-1 >=0 && y-1 >= 0 && y+1 < variables.WIDTH) {
+			value += Math.abs(variables.pixels[x-1][y+1] - variables.pixels[x-1][y-1]);
 		}
-		if(x-1 >=0 && y-2 >= 0 && y+2 < Variables.WIDTH) {
-			value += Math.abs(Variables.pixels[x-1][y+2] - Variables.pixels[x-1][y-2]);
+		if(x-1 >=0 && y-2 >= 0 && y+2 < variables.WIDTH) {
+			value += Math.abs(variables.pixels[x-1][y+2] - variables.pixels[x-1][y-2]);
 		}
-		if(y-1 >= 0 && y+1 < Variables.WIDTH) {
-			value += Math.abs(Variables.pixels[x][y-1] - Variables.pixels[x][y+1]);
+		if(y-1 >= 0 && y+1 < variables.WIDTH) {
+			value += Math.abs(variables.pixels[x][y-1] - variables.pixels[x][y+1]);
 		}
 		return f.apply(value);
 	}
 	
 	private int[][] convert2DImage() {
 
-		final byte[] pixels = ((DataBufferByte) Variables.image.getRaster().getDataBuffer()).getData();
-		final int width = Variables.image.getWidth();
-		final int height = Variables.image.getHeight();
-		final boolean hasAlphaChannel = Variables.image.getAlphaRaster() != null;
+		final byte[] pixels = ((DataBufferByte) variables.image.getRaster().getDataBuffer()).getData();
+		final int width = variables.image.getWidth();
+		final int height = variables.image.getHeight();
+		final boolean hasAlphaChannel = variables.image.getAlphaRaster() != null;
 		
 		int[][] result = new int[height][width];
 		int alpha = hasAlphaChannel?1:0;
@@ -160,7 +161,7 @@ public class Swarm {
 	
 	public void loadGrayscaleImage() {
 		int[][] pixels = convert2DImage();
-		BufferedImage mImage = new BufferedImage(Variables.WIDTH, Variables.HEIGHT, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage mImage = new BufferedImage(variables.WIDTH, variables.HEIGHT, BufferedImage.TYPE_BYTE_GRAY);
 		for(int row=0; row<pixels.length; row++) {
 			for(int col=0; col<pixels[0].length; col++) {
 				mImage.setRGB(col, row, pixels[row][col]);
@@ -177,10 +178,10 @@ public class Swarm {
 	
 	public void saveFinalImage() {
 		
-		BufferedImage mImage = new BufferedImage(Variables.WIDTH, Variables.HEIGHT, BufferedImage.TYPE_BYTE_GRAY);
-		for(int row=0; row<Variables.HEIGHT; row++) {
-			for(int col=0; col<Variables.WIDTH; col++) {
-				if(Variables.trails[col][row] > Variables.THRESHHOLD) {
+		BufferedImage mImage = new BufferedImage(variables.WIDTH, variables.HEIGHT, BufferedImage.TYPE_BYTE_GRAY);
+		for(int row=0; row<variables.HEIGHT; row++) {
+			for(int col=0; col<variables.WIDTH; col++) {
+				if(variables.trails[col][row] > variables.THRESHHOLD) {
 					mImage.setRGB(col, row, 255);
 				} else {
 					mImage.setRGB(col, row, (1 << 16) - 1);
@@ -198,8 +199,8 @@ public class Swarm {
 	}
 	
 	public void printArray(double[][] Array) {
-		for(int i=0; i<Variables.WIDTH; i++) {
-			for(int j=0; j<Variables.HEIGHT; j++) {
+		for(int i=0; i<variables.WIDTH; i++) {
+			for(int j=0; j<variables.HEIGHT; j++) {
 				if(Array[i][j] < 1e-3) {
 					System.out.print(0 + " ");
 				} else {
@@ -211,8 +212,8 @@ public class Swarm {
 	}
 	
 	public void printArray(int[][] Array) {
-		for(int i=0; i<Variables.WIDTH; i++) {
-			for(int j=0; j<Variables.HEIGHT; j++) {
+		for(int i=0; i<variables.WIDTH; i++) {
+			for(int j=0; j<variables.HEIGHT; j++) {
 				System.out.print(Array[i][j] + " ");
 			}
 			System.out.println();

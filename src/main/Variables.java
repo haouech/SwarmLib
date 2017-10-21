@@ -4,23 +4,36 @@ import java.util.ArrayList;
 
 public class Variables {
 	
-	public static int ITERATIONS = 40; 
-	public static int WIDTH  = 1000;
-	public static int HEIGHT  = 1000;
-	public static int NUM_ANTS = 10;
-	public static int ANT_DISTANCE = 300;
-	public static double TRAIL_INIT = 0.0001;
-	public static double LAMBDA = 1.0;
-	public static double alpha = 2.0;
-	public static double beta = 0.009;
-	public static double THRESHHOLD = 50.0;
-	public static double PHEROMONE_WEIGHT = 5.0;
-	public static ArrayList<Ant> antList = new ArrayList<Ant>();
-	public static BufferedImage image;
-	public static int[][] pixels = null;
-	public static double[][] heuristic = null;
-	public static double[][] trails = null;
-	public static int[][] visited = null;
-	public static int currentAntNumber = 0;
-	public static double EVAPORATION_RATE = 0.0009;
+	private static Variables instance = null;
+	
+	private Variables() {
+		
+	}
+	
+	public static Variables getInstance() {
+		if(instance == null) {
+			instance = new Variables();
+		}
+		return instance;
+	}
+	
+	public int ITERATIONS = 40; 
+	public int WIDTH  = 1000;
+	public int HEIGHT  = 1000;
+	public int NUM_ANTS = 10;
+	public int ANT_DISTANCE = 300;
+	public double TRAIL_INIT = 0.0001;
+	public double LAMBDA = 1.0;
+	public double alpha = 2.0;
+	public double beta = 0.009;
+	public double THRESHHOLD = 1500.0;
+	public double PHEROMONE_WEIGHT = 5.0;
+	public ArrayList<Ant> antList = new ArrayList<Ant>();
+	public BufferedImage image;
+	public int[][] pixels = null;
+	public double[][] heuristic = null;
+	public double[][] trails = null;
+	public int[][] visited = null;
+	public int currentAntNumber = 0;
+	public double EVAPORATION_RATE = 0.0009;
 }

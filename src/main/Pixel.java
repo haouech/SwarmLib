@@ -4,6 +4,7 @@ public class Pixel {
 	
 	private int x,y;
 	private int value;
+	private Variables variables = Variables.getInstance();
 	
 	public Pixel() {
 		x = 0;
@@ -19,7 +20,7 @@ public class Pixel {
 		}
 		this.x = x;
 		this.y = y;
-		value = Variables.pixels[x][y];
+		value = variables.pixels[x][y];
 	}
 	
 	public int getX() {
