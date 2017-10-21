@@ -4,15 +4,20 @@ import java.util.Vector;
 
 public class Ant extends Thread {
 	private int x_pos, y_pos;
+	private int x_old, y_old;
 	private boolean finished;
 	private int current_distance;
-	private final double TRAIL_WEIGHT = 5.0;
+//	private final double TRAIL_WEIGHT = 5.0;
 	private ArrayList<Pixel> path;
 	private Vector<Double> probabilites;
+	private Pheromones pheromones = null;
 	
 	public Ant(){
-		x_pos = (int)Math.random()*Variables.HEIGHT;
-		y_pos = (int)Math.random()*Variables.WIDTH;
+		x_pos = (int)(Math.random()*Variables.HEIGHT);
+		y_pos = (int)(Math.random()*Variables.WIDTH);
+		x_old = x_pos;
+		y_old = y_pos;
+		System.out.println("x: " + x_pos + ", y: " + y_pos);
 		finished = false;
 		current_distance = 0;
 		path = new ArrayList<Pixel>();
@@ -37,12 +42,17 @@ public class Ant extends Thread {
 			compute_transitions(pixels);
 			Pixel next_state = ant_decision(pixels);
 			move_to_next_state(next_state);
-//			deposit_pheromone();
+			update_local_trails();
 		}
+		System.out.println("Finished");
 		for(Pixel pixel : path) {
-			deposit_pheromone(pixel);
+//			Pheromones.deposit_pheromone(pixel);
 		}
 		die();
+	}
+	
+	public void setPheromones(Pheromones p) {
+		this.pheromones = p;
 	}
 	
 	private Vector<Pixel> read_local_pixels() {
@@ -51,7 +61,11 @@ public class Ant extends Thread {
 		int dx[] = {0,0,1,-1,1,-1,1,-1};
 		int dy[] = {1,-1,0,0,1,-1,-1,1};
 		for(int i=0;i<8;i++) {
-			pixels.add(new Pixel(x_pos+dx[i], y_pos+dy[i]));
+			int nx = x_pos + dx[i];
+			int ny = y_pos + dy[i];
+			if(nx < Variables.HEIGHT && nx >=0 && ny < Variables.WIDTH && ny >= 0 && nx != x_old && ny != y_old) {
+				pixels.add(new Pixel(nx, ny));
+			}
 		}
 		return pixels;
 	}
@@ -66,6 +80,7 @@ public class Ant extends Thread {
 			double n = Math.pow(Variables.heuristic[x][y], (double)Variables.beta);
 			sum += t*n;
 		}
+		probabilites = new Vector<Double>();
 		probabilites.setSize(pixels.size());
 		for(int i=0; i<pixels.size(); i++) {
 			Pixel pixel = pixels.get(i);
@@ -90,7 +105,7 @@ public class Ant extends Thread {
 		return pixels.get(idx);
 	}
 	
-	private void move_to_next_state(Pixel state) {
+	private synchronized void move_to_next_state(Pixel state) {
 		// TODO Move the ant to the next state 
 		current_distance++;
 		if(current_distance >= Variables.ANT_DISTANCE) {
@@ -99,16 +114,21 @@ public class Ant extends Thread {
 		path.add(state);
 		x_pos = state.getX();
 		y_pos = state.getY();
+		Variables.visited[x_pos][y_pos]++;
 	}
 	
-	private void deposit_pheromone(Pixel pixel) {
-		// TODO update current pixel
-		int x = pixel.getX();
-		int y = pixel.getY();
-		Variables.trails[x][y] += TRAIL_WEIGHT;
+//	private void deposit_pheromone(Pixel pixel) {
+//		// TODO update current pixel
+//		int x = pixel.getX();
+//		int y = pixel.getY();
+//		Variables.trails[x][y] += Variables.PHEROMONE_WEIGHT;
+//	}
+	private void update_local_trails() {
+		
 	}
 	
-	public void die() {
-		Variables.antList.remove(this);
+	public synchronized void die() {
+//		Variables.antList.remove(this);
+		Variables.currentAntNumber--;
 	}
 }

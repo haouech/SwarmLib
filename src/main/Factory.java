@@ -1,17 +1,43 @@
 package main;
 
+import java.util.Iterator;
+
 public class Factory {
 	
-	public Factory() {
+	private Pheromones pheromones;
+	
+	public Factory(Pheromones p) {
+		pheromones = p;
 	}
 	
 	public void generate() {
-		int antCount = Variables.NUM_ANTS - Variables.antList.size();
+		
+		int antCount = Variables.NUM_ANTS - Variables.currentAntNumber;
 		while(antCount-- > 0)
 		{
 			Ant a = new Ant();
+			a.setPheromones(pheromones);
 			Variables.antList.add(a);
 			a.start();
+			Variables.currentAntNumber++;
+			try {
+				a.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
+		Iterator<Ant> iter = Variables.antList.iterator();
+		while(iter.hasNext()) {
+			Ant a = iter.next();
+			try {
+				a.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+//		while(Variables.currentAntNumber != 0) {
+//			
+//		}
 	}
 }

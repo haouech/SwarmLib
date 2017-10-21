@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 
 public class Swarm {
 	
-	Factory factory = new Factory();
+	Factory factory;
 	Pheromones pheromones;
 //	BufferedImage image;
 	
@@ -19,11 +19,14 @@ public class Swarm {
 		Variables.HEIGHT = image.getHeight();
 		Variables.WIDTH = image.getWidth();
 		Variables.NUM_ANTS = (int)Math.sqrt(1.0*Variables.HEIGHT*Variables.WIDTH);
-		Variables.ANT_DISTANCE = Variables.HEIGHT + Variables.WIDTH;
+		System.out.println("Num Ants: " + Variables.NUM_ANTS);
+//		Variables.ANT_DISTANCE = Variables.HEIGHT + Variables.WIDTH;
 		Variables.antList = new ArrayList<Ant>();
 		Variables.pixels = convert2DImage();
 		Variables.trails = new double[Variables.HEIGHT][Variables.WIDTH];
+		Variables.visited = new int[Variables.HEIGHT][Variables.WIDTH];
 		pheromones = new Pheromones();
+		factory = new Factory(pheromones);
 	}
 	
 	public void search() {
@@ -32,25 +35,20 @@ public class Swarm {
 			return;
 		}
 		init();
-//		for(int i=0; i<Variables.WIDTH; i++) {
-//			for(int j=0; j<Variables.HEIGHT; j++) {
-//				System.out.print(Variables.heuristic[i][j] + " ");
-//			}
-//			System.out.println();
-//		}
-		System.out.println(Variables.heuristic);
+//		printArray(Variables.heuristic);
+//		System.out.println("************");
+//		printArray(Variables.pixels);
+		printArray(Variables.trails);
 		for(int i=0; i<Variables.ITERATIONS; i++) {
+			System.out.println("******  " + (i+1) + "  ******");
+			init_visited();
 			factory.generate();
+			System.out.println("******  " + (i+1) + "  ******");
 			pheromones.update();
 		}
 		
 
-		for(int i=0; i<Variables.WIDTH; i++) {
-			for(int j=0; j<Variables.HEIGHT; j++) {
-				System.out.print(Variables.trails[i][j] + " ");
-			}
-			System.out.println();
-		}
+		printArray(Variables.trails);
 		saveFinalImage();
 		
 	}
@@ -60,16 +58,25 @@ public class Swarm {
 		Variables.heuristic = init_heuristic_matrix();
 	}
 	
+	public void init_visited() {
+		for(int i=0; i<Variables.WIDTH; i++) {
+			for(int j=0; j<Variables.HEIGHT; j++) {
+				Variables.visited[i][j] = 0;
+			}
+		}		
+	}
+	
 	private double[][] init_heuristic_matrix() {
 		DoubleFunction<Double> f = x->{return Variables.LAMBDA*x;};
 		double Z = normalize_image(f);
+		System.out.println("Z: " + Z);
 		int width = Variables.WIDTH;
 		int height = Variables.HEIGHT;
 		double[][] heuristic = new double[height][width];
 		
 		for(int row=0;row<height; row++) {
 			for(int col=0; col<width; col++) {
-				heuristic[row][col] = 1e7 * VC(new Pixel(row, col), f) * Variables.pixels[row][col] / Z;
+				heuristic[row][col] = VC(new Pixel(row, col), f) / Z; // * Variables.pixels[row][col];
 			}
 		}
 		return heuristic;
@@ -85,7 +92,7 @@ public class Swarm {
 				Z += VC(new Pixel(row, col), f);
 			}
 		}
-		return Z;
+		return Z * 1e-6;
 	}
 	
 	private double VC(Pixel pixel, DoubleFunction<Double> f) {
@@ -147,7 +154,7 @@ public class Swarm {
 				row++;
 			}
 		}
-	
+
 		return result;
 	}
 	
@@ -188,6 +195,28 @@ public class Swarm {
 	    } catch (IOException e) {
 	        e.printStackTrace();
 	    }
+	}
+	
+	public void printArray(double[][] Array) {
+		for(int i=0; i<Variables.WIDTH; i++) {
+			for(int j=0; j<Variables.HEIGHT; j++) {
+				if(Array[i][j] < 1e-3) {
+					System.out.print(0 + " ");
+				} else {
+					System.out.printf("%.3f ",Array[i][j]);
+				}				
+			}
+			System.out.println();
+		}		
+	}
+	
+	public void printArray(int[][] Array) {
+		for(int i=0; i<Variables.WIDTH; i++) {
+			for(int j=0; j<Variables.HEIGHT; j++) {
+				System.out.print(Array[i][j] + " ");
+			}
+			System.out.println();
+		}		
 	}
 	
 }
